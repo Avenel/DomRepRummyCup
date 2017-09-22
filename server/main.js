@@ -1,3 +1,4 @@
+var path = require("path");
 var express = require('express')
 
 var app = express();
@@ -10,7 +11,8 @@ app.use(function(req, res, next) {
     next();
 });
 
-app.use('/', express.static('../'));
+app.use(express.static(path.join(__dirname, '../'), { maxAge: 86400000 }));
+// app.use('/', express.static('../'));
 
 // Datenbank initialisieren
 var storage = require('node-persist');
