@@ -278,7 +278,9 @@ try {
     initCards();
     initPlayerCards();
     initBoard();
-    app.listen(3000, '0.0.0.0')
+
+    var port = process.env.PORT || 8080;    
+    app.listen(port);
 } catch(e) {
     console.log(e);
 }
