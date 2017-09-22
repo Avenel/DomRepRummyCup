@@ -10,15 +10,14 @@ app.use(function(req, res, next) {
     next();
 });
 
-app.use(express.static('/'));
-
-
-var storage = require('node-persist');
-
+app.use('/', express.static('../'));
 
 // Datenbank initialisieren
+var storage = require('node-persist');
 storage.initSync( /* options ... */ );
 storage.setItemSync('players','[Simon, Alicia, Karin, Martin]');
+
+
 
 var initCards = function() {
     // init cards
