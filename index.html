@@ -30,40 +30,35 @@
         <div class="row">
             <div v-bind:class="['card', 'currentCard', currentCard.color]">
                 <div class="card-block" >
-                        <p>{{ currentCard.value }}</p>
+                        <p class="cardText">{{ currentCard.value }}</p>
                 </div>
             </div>
 
-            <div class="card m-1">
-                <div class="card-block" v-on:click="giveCardToPlayer(0)">
-                    110
-                </div>
-            </div>
+            <button class="btn btn-primary m-1" v-on:click="giveCardToPlayer(0)">
+                    Martin
+            </button>
             
-            <div class="card m-1">
-                <div class="card-block" v-on:click="giveCardToPlayer(1)">
-                    2
-                </div>
-            </div>
+            <button class="btn btn-primary m-1" v-on:click="giveCardToPlayer(1)">
+                    Karin
+            </button>
 
-            <div class="card m-1">
-                <div class="card-block" v-on:click="giveCardToPlayer(2)">
-                    3
-                </div>
-            </div>
+            <button class="btn btn-primary m-1" v-on:click="giveCardToPlayer(2)">
+                    Alicia
+            </button>
 
-            <div class="card m-1">
-                <div class="card-block" v-on:click="giveCardToPlayer(3)">
-                    4
-                </div>
-            </div>
+            <button class="btn btn-primary m-1" v-on:click="giveCardToPlayer(3)">
+                    Simon
+            </button>
+
         </div>
 
         <div class="row d-flex justify-content-center align-items-stretch flex-wrap" v-for="(row, rowIndex) in board.rows">
-            <div v-bind:class="[ 'card', card.card.color, 'm-1' ]" v-for="(card, colIndex) in row">
-                <div class="card-block" v-bind:id="card.id" v-on:click="putCard(rowIndex, colIndex)">
-                        <p>{{ card.card != null ? card.card.value : '' }}</p>
-                </div>
+            <div v-bind:class="[ 'card', 'cardSmall', card.card.color, 'm-1' ]" v-bind:id="card.id" 
+                v-on:click="putCard(rowIndex, colIndex)"
+                v-for="(card, colIndex) in row">
+                <!--<div class="card-block" >-->
+                        <p class="smallCardText">{{ card.card != null ? card.card.value : '' }}</p>
+               <!-- </div>-->
             </div>
         </div>
     </div>
@@ -109,7 +104,7 @@
                 var that = this;
                 setInterval(function() {
                     that.refreshMessage();
-                }, 1000);
+                }, 250);
             }
         })
     </script>

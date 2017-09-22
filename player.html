@@ -37,7 +37,7 @@
             <div class="d-flex justify-content-center flex-wrap"></div>
                 <div v-bind:class="[ (currentCard.id == card.id) ? 'active' : '', 'card', card.color, 'm-2' ]" v-for="card in cards">
                     <div class="card-block" v-bind:id="card.id" v-on:click="setCurrentCard(card)">
-                            <p>{{ card.value }}</p>
+                            <p class="cardText">{{ card.value }}</p>
                     </div>
                 </div>
             </div>

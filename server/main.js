@@ -87,8 +87,8 @@ var initBoard = function() {
 
     for(var i=0; i<100; i++) {
         var columns = [];
-        for(var j=0; j<13; j++) {
-            columns.push({card: { value: '', color: 'black'}});
+        for(var j=0; j<26; j++) {
+            columns.push({card: { value: '', color: 'white'}});
         }
 
         board.rows.push(columns);
@@ -269,6 +269,18 @@ app.get('/board', function(req, res) {
     try {
         var board = storage.getItemSync('board');
         res.json({ board: board });
+    }
+    catch (e)
+    {
+        console.log(e);
+    }
+});
+
+app.get('/reset', function(req, res) {
+    try {
+        initCards();
+        initPlayerCards();
+        initBoard();
     }
     catch (e)
     {
