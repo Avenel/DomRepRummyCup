@@ -1,0 +1,116 @@
+<!doctype html>
+<html lang="de">
+<head>
+  <meta charset="utf-8">
+
+  <title>The DomRep Rummy Cup - Laptop</title>
+  <meta name="description" content="Laptop Ansicht">
+  <meta name="author" content="SAKM">
+
+  <link rel="stylesheet" href="./node_modules/bootstrap/dist/css/bootstrap.css">
+  <link rel="stylesheet" href="./node_modules/font-awesome/css/font-awesome.css">
+  <link rel="stylesheet" href="styles.css">
+
+  <script src="./node_modules/jquery/dist/jquery.js"></script>
+  <script src="./node_modules/tether/dist/js/tether.js"></script>
+  <script src="./node_modules/bootstrap/dist/js/bootstrap.js"></script>
+  <script src="./node_modules/vue/dist/vue.js"></script>
+  <script src="./node_modules/vue-resource/dist/vue-resource.js"></script>
+
+</head>
+    
+
+<body>
+    <div id="app" class="container">
+
+        <h2 style="text-align: center;">
+                <img src="cartoon-palms.jpg" width="100px"/>
+                DomRep RummyCup</h2>
+
+        <div class="row">
+            <div v-bind:class="['card', 'currentCard', currentCard.color]">
+                <div class="card-block" >
+                        <p>{{ currentCard.value }}</p>
+                </div>
+            </div>
+
+            <div class="card m-1">
+                <div class="card-block" v-on:click="giveCardToPlayer(0)">
+                    1
+                </div>
+            </div>
+            
+            <div class="card m-1">
+                <div class="card-block" v-on:click="giveCardToPlayer(1)">
+                    2
+                </div>
+            </div>
+
+            <div class="card m-1">
+                <div class="card-block" v-on:click="giveCardToPlayer(2)">
+                    3
+                </div>
+            </div>
+
+            <div class="card m-1">
+                <div class="card-block" v-on:click="giveCardToPlayer(3)">
+                    4
+                </div>
+            </div>
+        </div>
+
+        <div class="row d-flex justify-content-center align-items-stretch flex-wrap" v-for="(row, rowIndex) in board.rows">
+            <div v-bind:class="[ 'card', card.card.color, 'm-1' ]" v-for="(card, colIndex) in row">
+                <div class="card-block" v-bind:id="card.id" v-on:click="putCard(rowIndex, colIndex)">
+                        <p>{{ card.card != null ? card.card.value : '' }}</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        var app = new Vue({
+            el: '#app',
+            methods: {
+                refreshMessage(resource) {
+                    this.$http.get('http://10.10.6.155:3000/board').then((response) => {
+                        this.board = response.body.board;
+                    });
+
+                    this.$http.get('http://10.10.6.155:3000/currentCard').then((response) => {
+                        this.currentCard = response.body;
+                    });
+                },
+
+                putCard(row, col) {
+                    var oldCard = JSON.parse(JSON.stringify(this.board.rows[row][col].card));
+
+                    // tausche Karte vom Board mit CurrentCard
+                    this.$http.post('http://10.10.6.155:3000/putCard', {row: row, col: col, card: this.currentCard})
+                    .then((response) => {
+                        this.$http.post('http://10.10.6.155:3000/currentCard', oldCard);
+                    });
+                },
+
+                giveCardToPlayer(playerId) {
+                    this.$http.get('http://10.10.6.155:3000/giveCardToPlayer?playerId=' + playerId 
+                        + "&cardId=" + this.currentCard.id)
+                    .then((response) => {
+                        this.$http.post('http://10.10.6.155:3000/currentCard', { value: '', id: -1 });
+                    });
+                }
+            },
+            data: {
+                board: {},
+                currentCard: {}
+            },
+            created: function () {
+                var that = this;
+                setInterval(function() {
+                    that.refreshMessage();
+                }, 1000);
+            }
+        })
+    </script>
+</body>
+</html>

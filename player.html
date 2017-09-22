@@ -1,0 +1,85 @@
+<!doctype html>
+<html lang="de">
+<head>
+    <meta charset="utf-8">
+
+    <title>The DomRep Rummy Cup - Mobil</title>
+    <meta name="description" content="Mobile Ansicht">
+    <meta name="author" content="SAKM">
+
+    <link rel="stylesheet" href="./node_modules/bootstrap/dist/css/bootstrap.css">
+    <link rel="stylesheet" href="./node_modules/font-awesome/css/font-awesome.css">
+    <link rel="stylesheet" href="styles.css">
+
+    <script src="./node_modules/jquery/dist/jquery.js"></script>
+    <script src="./node_modules/tether/dist/js/tether.js"></script>
+    <script src="./node_modules/bootstrap/dist/js/bootstrap.js"></script>
+    <script src="./node_modules/vue/dist/vue.js"></script>
+    <script src="./node_modules/vue-resource/dist/vue-resource.js"></script>
+
+</head>
+
+<body>
+    <div id="app" class="container">
+        <div class="row">
+            <button v-on:click="getCard" class="btn btn-primary getCardBtn"> 
+                <span class="fa fa-plus" aria-hidden="true"></span> 
+            </button>
+            <form>
+                <div class="form-group">
+                    <label>Spieler</label>
+                    <input type="text" v-model="playerId" class="form-control">
+                </div>
+            </form>
+        </div>
+
+        <div class="row">
+            <div class="d-flex justify-content-center flex-wrap"></div>
+                <div v-bind:class="[ (currentCard.id == card.id) ? 'active' : '', 'card', card.color, 'm-2' ]" v-for="card in cards">
+                    <div class="card-block" v-bind:id="card.id" v-on:click="setCurrentCard(card)">
+                            <p>{{ card.value }}</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        var app = new Vue({
+            el: '#app',
+            methods: {
+                refreshMessage() {
+                    this.$http.get('http://10.10.6.155:3000/currentCard').then((response) => {
+                        this.currentCard = response.body;
+                    });
+
+                    this.$http.get('http://10.10.6.155:3000/cards?playerId=' + this.playerId).then((response) => {
+                        this.cards = response.body.cards;
+                    });
+                },
+                setCurrentCard(card) {
+                    this.$http.post('http://10.10.6.155:3000/currentCard', card).then((response) => {
+                        this.refreshMessage();
+                    });
+                },
+                getCard() {
+                    this.$http.get('http://10.10.6.155:3000/getCard?playerId=' + this.playerId).then((response) => {
+                        this.refreshMessage();
+                    });
+                }
+            },
+            data: {
+                cards: [],
+                playerId: 0,
+                currentCard: {}
+            },
+            created: function () {
+                var that = this;
+                setInterval(function() {
+                    that.refreshMessage();
+                }, 1000);
+            }
+        })
+    </script>
+</body>
+</html>

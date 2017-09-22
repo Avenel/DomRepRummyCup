@@ -1,0 +1,44 @@
+.card {
+    height: 100px;
+    min-width: 75px;
+    cursor: pointer;
+}
+.card p {
+    text-align: center;
+    line-height: 55px;
+    font-weight: 500;
+    font-size: 32px; 
+}
+
+.active {
+    border: 2px solid;
+}
+
+.currentCard, .getCardBtn {
+    margin: 0 auto;
+}
+
+.getCardBtn {
+    width: 175px;
+    height: 100px;
+}
+
+.yellow {
+    color: darkgoldenrod;
+    background: yellow;
+}
+
+.red {
+    color: darkred;
+    background: lightcoral;
+}
+
+.black {
+    color: black;
+    background: lightgray;
+}
+
+.blue {
+    color: blue;
+    background: lightblue;
+}
