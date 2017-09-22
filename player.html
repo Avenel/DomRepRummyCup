@@ -49,21 +49,21 @@
             el: '#app',
             methods: {
                 refreshMessage() {
-                    this.$http.get(baseUrl + 'currentCard').then((response) => {
+                    this.$http.get(this.baseUrl + 'currentCard').then((response) => {
                         this.currentCard = response.body;
                     });
 
-                    this.$http.get(baseUrl + 'cards?playerId=' + this.playerId).then((response) => {
+                    this.$http.get(this.baseUrl + 'cards?playerId=' + this.playerId).then((response) => {
                         this.cards = response.body.cards;
                     });
                 },
                 setCurrentCard(card) {
-                    this.$http.post(baseUrl + 'currentCard', card).then((response) => {
+                    this.$http.post(this.baseUrl + 'currentCard', card).then((response) => {
                         this.refreshMessage();
                     });
                 },
                 getCard() {
-                    this.$http.get(baseUrl + 'getCard?playerId=' + this.playerId).then((response) => {
+                    this.$http.get(this.baseUrl + 'getCard?playerId=' + this.playerId).then((response) => {
                         this.refreshMessage();
                     });
                 }

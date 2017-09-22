@@ -73,11 +73,11 @@
             el: '#app',
             methods: {
                 refreshMessage(resource) {
-                    this.$http.get(baseUrl +'board').then((response) => {
+                    this.$http.get(this.baseUrl +'board').then((response) => {
                         this.board = response.body.board;
                     });
 
-                    this.$http.get(baseUrl +'currentCard').then((response) => {
+                    this.$http.get(this.baseUrl +'currentCard').then((response) => {
                         this.currentCard = response.body;
                     });
                 },
@@ -86,17 +86,17 @@
                     var oldCard = JSON.parse(JSON.stringify(this.board.rows[row][col].card));
 
                     // tausche Karte vom Board mit CurrentCard
-                    this.$http.post(baseUrl +'putCard', {row: row, col: col, card: this.currentCard})
+                    this.$http.post(this.baseUrl +'putCard', {row: row, col: col, card: this.currentCard})
                     .then((response) => {
-                        this.$http.post(baseUrl +'currentCard', oldCard);
+                        this.$http.post(this.baseUrl +'currentCard', oldCard);
                     });
                 },
 
                 giveCardToPlayer(playerId) {
-                    this.$http.get(baseUrl +'giveCardToPlayer?playerId=' + playerId 
+                    this.$http.get(this.baseUrl +'giveCardToPlayer?playerId=' + playerId 
                         + "&cardId=" + this.currentCard.id)
                     .then((response) => {
-                        this.$http.post(baseUrl +'currentCard', { value: '', id: -1 });
+                        this.$http.post(this.baseUrl +'currentCard', { value: '', id: -1 });
                     });
                 }
             },
