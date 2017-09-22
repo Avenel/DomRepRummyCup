@@ -10,6 +10,8 @@ app.use(function(req, res, next) {
     next();
 });
 
+app.use(express.static('/'));
+
 
 var storage = require('node-persist');
 

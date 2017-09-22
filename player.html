@@ -49,21 +49,21 @@
             el: '#app',
             methods: {
                 refreshMessage() {
-                    this.$http.get('http://10.10.6.155:3000/currentCard').then((response) => {
+                    this.$http.get(baseUrl + 'currentCard').then((response) => {
                         this.currentCard = response.body;
                     });
 
-                    this.$http.get('http://10.10.6.155:3000/cards?playerId=' + this.playerId).then((response) => {
+                    this.$http.get(baseUrl + 'cards?playerId=' + this.playerId).then((response) => {
                         this.cards = response.body.cards;
                     });
                 },
                 setCurrentCard(card) {
-                    this.$http.post('http://10.10.6.155:3000/currentCard', card).then((response) => {
+                    this.$http.post(baseUrl + 'currentCard', card).then((response) => {
                         this.refreshMessage();
                     });
                 },
                 getCard() {
-                    this.$http.get('http://10.10.6.155:3000/getCard?playerId=' + this.playerId).then((response) => {
+                    this.$http.get(baseUrl + 'getCard?playerId=' + this.playerId).then((response) => {
                         this.refreshMessage();
                     });
                 }
@@ -71,7 +71,8 @@
             data: {
                 cards: [],
                 playerId: 0,
-                currentCard: {}
+                currentCard: {},
+                baseUrl: '/'
             },
             created: function () {
                 var that = this;
