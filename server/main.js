@@ -12,7 +12,10 @@ app.use(function(req, res, next) {
 });
 
 app.use(express.static(path.join(__dirname, '../'), { maxAge: 86400000 }));
-// app.use('/', express.static('../'));
+app.use(express.static(path.join(__dirname + '../node_modules')));  
+
+var http = require('http').Server(app);
+var io = require('socket.io')(http);
 
 // Datenbank initialisieren
 var storage = require('node-persist');
@@ -151,7 +154,9 @@ app.post('/currentCard', function(req, res) {
     try
     {
         var currentCardFromBody = req.body;
-        storage.setItemSync('currentCard', currentCardFromBody);        
+        storage.setItemSync('currentCard', currentCardFromBody);
+        
+        io.emit('refresh', 'hello World');
         res.json({ok: true});
     }
     catch (e)
@@ -197,6 +202,8 @@ app.post('/putCard', function(req, res) {
         console.log("setze karte aufs spielfeld");
         board.rows[position.row][position.col].card = position.card;
         storage.setItemSync('board', board);
+
+        io.emit('refresh', { for: 'everyone' });
         res.json({ok: true});
     }
     catch (e)
@@ -238,6 +245,7 @@ app.get('/giveCardToPlayer', function(req, res) {
         card.player = playerId;
         storage.setItemSync('cards', cards);
 
+        io.emit('refresh', 'hello world.');
         res.json(card);
     }
     catch(e) {
@@ -288,14 +296,28 @@ app.get('/reset', function(req, res) {
     }
 });
 
+
 // INIT APP
 try {
+    // Websockets
+    io.on('connection', function(socket){
+        console.log('a user connected');
+        
+        socket.on('disconnect', function(){
+            console.log('user disconnected');
+        });
+
+        io.emit('refresh', { for: 'everyone' });
+    });
+
     initCards();
     initPlayerCards();
     initBoard();
 
     var port = process.env.PORT || 8080;    
-    app.listen(port);
+    http.listen(port, function() {
+        console.log('listening on: ' + port );
+    });  
 } catch(e) {
     console.log(e);
 }

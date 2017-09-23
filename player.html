@@ -16,6 +16,7 @@
     <script src="./node_modules/bootstrap/dist/js/bootstrap.js"></script>
     <script src="./node_modules/vue/dist/vue.js"></script>
     <script src="./node_modules/vue-resource/dist/vue-resource.js"></script>
+    <script src="./node_modules/socket.io-client/dist/socket.io.js"></script>  
 
 </head>
 
@@ -72,13 +73,22 @@
                 cards: [],
                 playerId: 0,
                 currentCard: {},
-                baseUrl: '/'
+                baseUrl: '/',
+                socket: {}
             },
             created: function () {
-                var that = this;
-                setInterval(function() {
-                    that.refreshMessage();
-                }, 1000);
+                try {
+                    var that = this;
+                    this.socket = io();
+
+                    this.socket.on('refresh', function(msg) {
+                        console.log('refresh');
+                        that.refreshMessage();
+                    });
+                }
+                catch (e) {
+                    console.log(e);
+                }
             }
         })
     </script>
