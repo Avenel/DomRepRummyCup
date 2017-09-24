@@ -24,9 +24,31 @@
 <body>
     <div id="app" class="container">
 
-        <h2 style="text-align: center;">
-                <img src="cartoon-palms.jpg" width="100px"/>
-                DomRep RummyCup</h2>
+        <div class="row">
+            <div class="col-10">
+                <h2 style="text-align: center;">
+                    <img src="cartoon-palms.jpg" width="100px"/>
+                    DomRep RummyCup</h2>
+            </div>
+
+            <div class="d-flex flex-column col-2">
+                <button class="btn btn-sm btn-primary m-1" v-on:click="giveCardToPlayer(0)">
+                        Martin
+                </button>
+                
+                <button class="btn btn-sm btn-primary m-1" v-on:click="giveCardToPlayer(1)">
+                        Karin
+                </button>
+    
+                <button class="btn btn-sm btn-primary m-1" v-on:click="giveCardToPlayer(2)">
+                        Alicia
+                </button>
+    
+                <button class="btn btn-sm btn-primary m-1" v-on:click="giveCardToPlayer(3)">
+                        Simon
+                </button>
+            </div>
+        </div>
 
         <div class="row">
             <div v-for="(currentCard, colIndex) in currentCards">
@@ -37,32 +59,26 @@
                     </div>
                 </div>
             </div>
-
-            <button class="btn btn-primary m-1" v-on:click="giveCardToPlayer(0)">
-                    Martin
-            </button>
-            
-            <button class="btn btn-primary m-1" v-on:click="giveCardToPlayer(1)">
-                    Karin
-            </button>
-
-            <button class="btn btn-primary m-1" v-on:click="giveCardToPlayer(2)">
-                    Alicia
-            </button>
-
-            <button class="btn btn-primary m-1" v-on:click="giveCardToPlayer(3)">
-                    Simon
-            </button>
-
         </div>
 
         <div class="row d-flex justify-content-center align-items-stretch flex-wrap" v-for="(row, rowIndex) in board.rows">
             <div v-bind:class="[ 'card', 'cardSmall', card.card.color, 'm-1' ]" v-bind:id="card.id" 
                 v-on:click="putCard(rowIndex, colIndex)"
                 v-for="(card, colIndex) in row">
-                <!--<div class="card-block" >-->
-                        <p class="smallCardText">{{ card.card != null ? card.card.value : '' }}</p>
-               <!-- </div>-->
+                    <p class="smallCardText">{{ card.card != null ? card.card.value : '' }}</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Loading Modal -->
+    <div class="modal" id="loadingModal">
+        <div class="modal-dialog" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Bitte warten...</h5>
+                </div>
+                <div class="modal-body"></div>
+                <div class="modal-footer"></div>
             </div>
         </div>
     </div>
@@ -72,31 +88,42 @@
             el: '#app',
             methods: {
                 refreshMessage(resource) {
+                    $('#loadingModal').modal('show');
                     this.$http.get(this.baseUrl +'board').then((response) => {
                         this.board = response.body.board;
-                    });
-
-                    this.$http.get(this.baseUrl +'currentCards').then((response) => {
-                        this.currentCards = response.body;
+                        this.$http.get(this.baseUrl +'currentCards').then((response) => {
+                            this.currentCards = response.body;
+                            $('#loadingModal').modal('hide');
+                        });
                     });
                 },
 
                 putCard(row, col) {
                     var oldCard = JSON.parse(JSON.stringify(this.board.rows[row][col].card));
 
+                    $('#loadingModal').modal('show');
                     // tausche Karte vom Board mit CurrentCard
                     this.$http.post(this.baseUrl +'putCard', {row: row, col: col,
                          card: this.selectedCard})
                     .then((response) => {
-                        this.$http.post(this.baseUrl +'currentCard', oldCard);
+                        this.$http.post(this.baseUrl +'currentCard', oldCard)
+                        .then((response) => {
+                            $('#loadingModal').modal('hide');
+                        });
+                        
                         this.selectCard(null);
                     });
                 },
 
                 giveCardToPlayer(playerId) {
                     if (this.selectedCard != null) {
+                        $('#loadingModal').modal('show');
                         this.$http.get(this.baseUrl +'giveCardToPlayer?playerId=' + playerId 
-                            + "&cardId=" + this.selectedCard.id);
+                            + "&cardId=" + this.selectedCard.id)
+                        .then((response) => {
+                            this.selectCard(null);
+                            $('#loadingModal').modal('hide');
+                        });
                     }
                 },
 
@@ -109,7 +136,8 @@
                 currentCards: [],
                 baseUrl: '/',
                 socket: {},
-                selectedCard: null
+                selectedCard: null,
+                isLoading: false
             },
             created: function () {
                 try {

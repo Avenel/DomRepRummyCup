@@ -171,6 +171,8 @@ app.post('/currentCard', function(req, res) {
             if (currentCards.map(function(card) { return card.id }).indexOf(currentCardFromBody.id) < 0) {
                 currentCards.push(currentCardFromBody);
                 storage.setItemSync('currentCards', currentCards);
+            } else {
+                removeCardFromCurrentCards(currentCardFromBody);
             }
 
             io.emit('refresh', 'hello World');
