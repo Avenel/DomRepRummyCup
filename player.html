@@ -23,19 +23,31 @@
 <body>
     <div id="app" class="container">
 
-        <div class="row">
+        <div id="choosePlayerWrapper" class="d-flex flex-column" v-if="playerId < 0">
+                <button class="btn btn-primary m-1" v-on:click="setPlayer(0)">
+                        Martin
+                </button>
+                
+                <button class="btn btn-primary m-1" v-on:click="setPlayer(1)">
+                        Karin
+                </button>
+    
+                <button class="btn btn-primary m-1" v-on:click="setPlayer(2)">
+                        Alicia
+                </button>
+    
+                <button class="btn btn-primary m-1" v-on:click="setPlayer(3)">
+                        Simon
+                </button>
+        </div>
+
+        <div class="row" v-if="playerId >= 0">
             <button v-on:click="getCard" class="btn btn-primary getCardBtn"> 
                 <span class="fa fa-plus" aria-hidden="true"></span> 
             </button>
-            <form>
-                <div class="form-group">
-                    <label>Spieler</label>
-                    <input type="text" v-model="playerId" class="form-control">
-                </div>
-            </form>
         </div>
 
-        <div class="row">
+        <div class="row" v-if="playerId >= 0">
             <div class="d-flex justify-content-center flex-wrap"></div>
                 <div v-bind:class="[ (currentCards.map(function(card) { return card.id; }).indexOf(card.id) >= 0) ? 'active' : '', 'card', card.color, 'm-2' ]" v-for="card in cards">
                     <div class="card-block" v-bind:id="card.id" v-on:click="setCurrentCard(card)">
@@ -64,15 +76,22 @@
                         this.refreshMessage();
                     });
                 },
+
                 getCard() {
                     this.$http.get(this.baseUrl + 'getCard?playerId=' + this.playerId).then((response) => {
                         this.refreshMessage();
                     });
+                },
+
+                setPlayer(playerId) {
+                    this.playerId = playerId;
+                    console.log("playerID: " + this.playerId); 
+                    this.refreshMessage();
                 }
             },
             data: {
                 cards: [],
-                playerId: 0,
+                playerId: -1,
                 currentCards: [],
                 baseUrl: '/',
                 socket: {}
@@ -86,8 +105,6 @@
                         console.log('refresh');
                         that.refreshMessage();
                     });
-
-                    this.refreshMessage();
                 }
                 catch (e) {
                     console.log(e);
