@@ -29,9 +29,12 @@
                 DomRep RummyCup</h2>
 
         <div class="row">
-            <div v-bind:class="['card', 'currentCard', currentCard.color]">
-                <div class="card-block" >
-                        <p class="cardText">{{ currentCard.value }}</p>
+            <div v-for="(currentCard, colIndex) in currentCards">
+                <div v-bind:class="['card', 'currentCard', currentCard.color, (selectedCard != null && selectedCard.id == currentCard.id)? 'active' : '']"
+                    v-on:click="selectCard(currentCard)">
+                    <div class="card-block" >
+                            <p class="cardText">{{ currentCard.value }}</p>
+                    </div>
                 </div>
             </div>
 
@@ -73,8 +76,8 @@
                         this.board = response.body.board;
                     });
 
-                    this.$http.get(this.baseUrl +'currentCard').then((response) => {
-                        this.currentCard = response.body;
+                    this.$http.get(this.baseUrl +'currentCards').then((response) => {
+                        this.currentCards = response.body;
                     });
                 },
 
@@ -82,25 +85,31 @@
                     var oldCard = JSON.parse(JSON.stringify(this.board.rows[row][col].card));
 
                     // tausche Karte vom Board mit CurrentCard
-                    this.$http.post(this.baseUrl +'putCard', {row: row, col: col, card: this.currentCard})
+                    this.$http.post(this.baseUrl +'putCard', {row: row, col: col,
+                         card: this.selectedCard})
                     .then((response) => {
                         this.$http.post(this.baseUrl +'currentCard', oldCard);
+                        this.selectCard(null);
                     });
                 },
 
                 giveCardToPlayer(playerId) {
-                    this.$http.get(this.baseUrl +'giveCardToPlayer?playerId=' + playerId 
-                        + "&cardId=" + this.currentCard.id)
-                    .then((response) => {
-                        this.$http.post(this.baseUrl +'currentCard', { value: '', id: -1 });
-                    });
+                    if (this.selectedCard != null) {
+                        this.$http.get(this.baseUrl +'giveCardToPlayer?playerId=' + playerId 
+                            + "&cardId=" + this.selectedCard.id);
+                    }
+                },
+
+                selectCard(card) {
+                    this.selectedCard = card;
                 }
             },
             data: {
                 board: {},
-                currentCard: {},
+                currentCards: [],
                 baseUrl: '/',
-                socket: {}
+                socket: {},
+                selectedCard: null
             },
             created: function () {
                 try {

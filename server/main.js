@@ -25,6 +25,9 @@ storage.setItemSync('players','[Simon, Alicia, Karin, Martin]');
 
 
 var initCards = function() {
+    // current cards
+    storage.setItemSync('currentCards', []);
+
     // init cards
     var cards = [];
     var cardId = 0;
@@ -88,7 +91,7 @@ var initBoard = function() {
         rows: []
     };
 
-    for(var i=0; i<100; i++) {
+    for(var i=0; i<11; i++) {
         var columns = [];
         for(var j=0; j<26; j++) {
             columns.push({card: { value: '', color: 'white'}});
@@ -134,6 +137,14 @@ var initPlayerCards = function() {
     storage.setItemSync('cards', cards);  
 };
 
+var removeCardFromCurrentCards = function(cardToRemove) {
+    var currentCards = storage.getItemSync('currentCards');    
+    var index = currentCards.map(function(card) { return card.id }).indexOf(cardToRemove.id);
+    if (index >= 0) {
+        currentCards.splice(index, 1);
+        storage.setItemSync('currentCards', currentCards);
+    }
+};
 
 // BACKEND
 // Spieler
@@ -149,14 +160,21 @@ app.get('/players', function(req, res) {
     }
 })  
 
-// aktuelle Karte setzen
+// aktuelle Karte hinzufügen setzen
 app.post('/currentCard', function(req, res) {
     try
     {
         var currentCardFromBody = req.body;
-        storage.setItemSync('currentCard', currentCardFromBody);
-        
-        io.emit('refresh', 'hello World');
+        if (currentCardFromBody != null && currentCardFromBody.value != '') {
+            var currentCards = storage.getItemSync('currentCards'); 
+
+            if (currentCards.map(function(card) { return card.id }).indexOf(currentCardFromBody.id) < 0) {
+                currentCards.push(currentCardFromBody);
+                storage.setItemSync('currentCards', currentCards);
+            }
+
+            io.emit('refresh', 'hello World');
+        }
         res.json({ok: true});
     }
     catch (e)
@@ -167,10 +185,10 @@ app.post('/currentCard', function(req, res) {
 });
 
 // aktuelle Karte bekommen
-app.get('/currentCard', function(req, res) {
+app.get('/currentCards', function(req, res) {
     try
     {
-        var card = storage.getItemSync('currentCard');
+        var card = storage.getItemSync('currentCards');
         res.json(card);
     }
     catch (e)
@@ -185,24 +203,33 @@ app.post('/putCard', function(req, res) {
     try
     {
         var position = req.body;
+
+        console.log(position);
         var board = storage.getItemSync('board');
-        var cards = storage.getItemSync('cards');
-
-        // suche karte und sage das diese auf dem Spiel liegt
-        console.log("suche karte");
-        cards.forEach(function(card) {
-            if (card.id == position.card.id) {
-                card.player = -2;
-            }
-        }, this);
-        storage.setItemSync('cards', cards);
-        console.log("karte gefunden");
-
-        // setze Karte auf Spielfeld
-        console.log("setze karte aufs spielfeld");
-        board.rows[position.row][position.col].card = position.card;
+        if (position.card != null) {
+            var cards = storage.getItemSync('cards');    
+            // suche karte und sage das diese auf dem Spiel liegt
+            console.log("suche karte");
+            cards.forEach(function(card) {
+                if (card.id == position.card.id) {
+                    card.player = -2;
+                }
+            }, this);
+            storage.setItemSync('cards', cards);
+            console.log("karte gefunden");
+    
+            // setze Karte auf Spielfeld
+            console.log("setze karte aufs spielfeld");
+            board.rows[position.row][position.col].card = position.card;
+            
+            // nehme es aus den currentCards heraus
+            removeCardFromCurrentCards(position.card);
+        } else {
+            board.rows[position.row][position.col].card = { value: '', color: 'white' };
+        }
+        
         storage.setItemSync('board', board);
-
+        
         io.emit('refresh', { for: 'everyone' });
         res.json({ok: true});
     }
@@ -244,6 +271,8 @@ app.get('/giveCardToPlayer', function(req, res) {
 
         card.player = playerId;
         storage.setItemSync('cards', cards);
+
+        removeCardFromCurrentCards(card);
 
         io.emit('refresh', 'hello world.');
         res.json(card);
