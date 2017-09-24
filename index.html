@@ -51,6 +51,16 @@
         </div>
 
         <div class="row">
+            <button class="btn btn-sm btn-primary m-1" v-on:click="saveState()">
+                    Save
+            </button>
+
+            <button class="btn btn-sm btn-primary m-1" v-on:click="loadState()">
+                    Load last
+            </button>
+        </div>
+
+        <div class="row">
             <div v-for="(currentCard, colIndex) in currentCards">
                 <div v-bind:class="['card', 'currentCard', currentCard.color, (selectedCard != null && selectedCard.id == currentCard.id)? 'active' : '']"
                     v-on:click="selectCard(currentCard)">
@@ -127,6 +137,23 @@
 
                 selectCard(card) {
                     this.selectedCard = card;
+                },
+
+                saveState() {
+                    $('#loadingModal').modal('show');
+                    this.$http.get(this.baseUrl +'save')
+                    .then((response) => {
+                        this.lastStateTimestamp = response.lastStateTimeStamp;
+                        $('#loadingModal').modal('hide');
+                    });
+                },
+
+                loadState() {
+                    $('#loadingModal').modal('show');
+                    this.$http.get(this.baseUrl +'load')
+                    .then((response) => {
+                        $('#loadingModal').modal('hide');
+                    });
                 }
             },
             data: {
@@ -135,7 +162,8 @@
                 baseUrl: '/',
                 socket: {},
                 selectedCard: null,
-                isLoading: false
+                isLoading: false,
+                lastStateTimestamp: null
             },
             created: function () {
                 try {

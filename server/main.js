@@ -327,6 +327,55 @@ app.get('/reset', function(req, res) {
     }
 });
 
+app.get('/save', function(req, res) {
+    try {
+        var saveState = {
+            board: storage.getItemSync('board'),
+            cards: storage.getItemSync('cards'),
+            currentCards: storage.getItemSync('currentCards'),
+            timestamp: Date.now()
+        }
+    
+        var saveStates = storage.getItemSync('saveStates');
+        saveStates.push(saveState);
+        storage.setItemSync('saveStates', saveStates);
+        res.json({ok: true, lastStateTimeStamp: saveState.timestamp});
+    }
+    catch (e) {
+        console.log(e);
+        res.json({ok: false});
+    }
+    
+});
+
+app.get('/load', function(req, res) {
+    try {
+        console.log('load...');
+        var saveStates = storage.getItemSync('saveStates');
+        console.log('loaded...');
+        if (saveStates.length > 0) {
+            console.log('pop');
+            var lastState = saveStates.pop();
+            console.log(lastState);
+
+            var board = lastState.board; 
+            var cards = lastState.cards; 
+            var currentCards = lastState.currentCards; 
+
+            storage.setItemSync('board', board);
+            storage.setItemSync('cards', cards);
+            storage.setItemSync('currentCards', currentCards);
+            storage.setItemSync('saveStates', saveStates);
+
+            io.emit('refresh', 'hello world.');
+        }
+        res.json({ ok: true });
+    }
+    catch (e) {
+        console.log(e);
+        res.json({ ok: false });
+    }
+});
 
 // INIT APP
 try {
@@ -341,6 +390,7 @@ try {
         io.emit('refresh', { for: 'everyone' });
     });
 
+    storage.setItemSync('saveStates', []);
     initCards();
     initPlayerCards();
     initBoard();
