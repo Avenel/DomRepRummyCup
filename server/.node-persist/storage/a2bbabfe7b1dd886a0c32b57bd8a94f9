@@ -1,1 +1,1 @@
-{"key":"players","value":"[Simon, Alicia, Karin, Martin]"}
+{"key":"players","value":[{"playerId":0,"name":"Martin","socketId":null,"isConnected":false},{"playerId":1,"name":"Karin","socketId":"BFkBEOwUBPuG2tWwAAAB","isConnected":false},{"playerId":2,"name":"Alicia","socketId":null,"isConnected":false},{"playerId":3,"name":"Simon","socketId":null,"isConnected":false}]}

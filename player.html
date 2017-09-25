@@ -21,7 +21,7 @@
 </head>
 
 <body>
-    <div id="app" class="container">
+    <div id="app" class="container" style="margin-top:15px;">
 
         <div id="choosePlayerWrapper" class="d-flex flex-column" v-if="playerId < 0">
                 <button class="btn btn-primary m-1" v-on:click="setPlayer(0)">
@@ -43,8 +43,13 @@
 
         <div class="row" v-if="playerId >= 0">
             <h5>Player: {{ playerId }}</h5>
+            <h5 v-if="itIsYourTurn">Du bist dran!</h5>
             <button v-on:click="getCard" class="btn btn-primary getCardBtn"> 
                 <span class="fa fa-plus" aria-hidden="true"></span> 
+            </button>
+
+            <button v-on:click="nextPlayer" class="btn btn-primary getCardBtn"> 
+                <span>Next</span> 
             </button>
         </div>
 
@@ -84,10 +89,17 @@
                     });
                 },
 
+                nextPlayer() {
+                    this.$http.get(this.baseUrl + 'nextPlayer').then((response) => {
+                    });
+                },
+
                 setPlayer(playerId) {
                     this.playerId = playerId;
                     console.log("playerID: " + this.playerId); 
                     this.refreshMessage();
+
+                    this.socket.emit('setPlayer', { playerId: this.playerId, socketId: this.socket.id});
                 }
             },
             data: {
@@ -95,7 +107,8 @@
                 playerId: -1,
                 currentCards: [],
                 baseUrl: '/',
-                socket: {}
+                socket: {},
+                itIsYourTurn: false
             },
             created: function () {
                 try {
@@ -105,6 +118,10 @@
                     this.socket.on('refresh', function(msg) {
                         console.log('refresh');
                         that.refreshMessage();
+                    });
+
+                    this.socket.on('itIsYourTurn', function(msg) {
+                        that.itIsYourTurn = (msg.playerId == that.playerId);
                     });
                 }
                 catch (e) {

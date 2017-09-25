@@ -20,9 +20,37 @@ var io = require('socket.io')(http);
 // Datenbank initialisieren
 var storage = require('node-persist');
 storage.initSync( /* options ... */ );
-storage.setItemSync('players','[Simon, Alicia, Karin, Martin]');
 
 
+var initPlayers = function() {
+    var players = [
+        {
+            playerId: 0,
+            name: 'Martin',
+            socketId: null,
+            isConnected: false
+        },
+        {
+            playerId: 1,
+            name: 'Karin',
+            socketId: null,
+            isConnected: false
+        },
+        {
+            playerId: 2,
+            name: 'Alicia',
+            socketId: null,
+            isConnected: false
+        },
+        {
+            playerId: 3,
+            name: 'Simon',
+            socketId: null,
+            isConnected: false
+        }
+    ]
+    storage.setItemSync('players', players);
+};
 
 var initCards = function() {
     // current cards
@@ -158,7 +186,7 @@ app.get('/players', function(req, res) {
     {
         console.log(e);
     }
-})  
+});  
 
 // aktuelle Karte hinzufügen setzen
 app.post('/currentCard', function(req, res) {
@@ -377,20 +405,40 @@ app.get('/load', function(req, res) {
     }
 });
 
+app.get('/nextPlayer', function(req, res) { 
+    var currentPlayer = storage.getItemSync('currentPlayer');
+    
+});
+
 // INIT APP
 try {
     // Websockets
     io.on('connection', function(socket){
-        console.log('a user connected');
-        
-        socket.on('disconnect', function(){
-            console.log('user disconnected');
+        var playerId = -1;
+        var socketId = socket.id;
+
+        socket.on('disconnect', function(socket){
+            var players = storage.getItemSync('players');
+            players[playerId].isConnected = false;
+            console.log(players[playerId].name + ' disconnected');
+            storage.setItemSync('players', players);
+        });
+
+        socket.on('setPlayer', function(msg) {
+            var players = storage.getItemSync('players');
+            var player = players[msg.playerId];
+            player.isConnected = true;
+            playerId = msg.playerId;
+            player.socketId = msg.socketId;
+            storage.setItemSync('players', players);
+            console.log(player.name + ' connected');
         });
 
         io.emit('refresh', { for: 'everyone' });
     });
 
     storage.setItemSync('saveStates', []);
+    initPlayers();
     initCards();
     initPlayerCards();
     initBoard();
